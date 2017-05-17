@@ -21,7 +21,7 @@ auditLog()
    ->withProperties(['customProperty' => 'customValue'])
    ->log('Look, I logged something');
    
-$lastLoggedAudit = Audit::all()->last();
+$lastLoggedAudit = AuditLog::all()->last();
 
 $lastLoggedAudit->subject; //returns an instance of an eloquent model
 $lastLoggedAudit->causer; //returns an instance of your user model
@@ -70,7 +70,7 @@ Next, you must install the service provider:
 // config/app.php
 'providers' => [
     ...
-    Jeylabs\Auditlog\AuditlogServiceProvider::class,
+    Jeylabs\AuditLog\AuditLogServiceProvider::class,
 ];
 ```
 

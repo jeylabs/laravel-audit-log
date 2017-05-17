@@ -4,10 +4,10 @@ namespace Jeylabs\AuditLog;
 
 use Illuminate\Auth\AuthManager;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Models\Activity;
+use Jeylabs\AuditLog\Models\AuditLog;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Config\Repository;
-use Spatie\Activitylog\Exceptions\CouldNotLogActivity;
+use Jeylabs\AuditLog\Exceptions\CouldNotLogAudit;
 
 class AuditLogger
 {
@@ -128,7 +128,7 @@ class AuditLogger
             return;
         }
 
-        $activity = ActivitylogServiceProvider::getActivityModelInstance();
+        $activity = AuditLogServiceProvider::getActivityModelInstance();
 
         if ($this->performedOn) {
             $activity->subject()->associate($this->performedOn);
@@ -141,6 +141,8 @@ class AuditLogger
         $activity->properties = $this->properties;
 
         $activity->description = $this->replacePlaceholders($description, $activity);
+
+        $activity->ip = request()->ip();
 
         $activity->log_name = $this->logName;
 
@@ -169,7 +171,7 @@ class AuditLogger
         throw CouldNotLogActivity::couldNotDetermineUser($modelOrId);
     }
 
-    protected function replacePlaceholders(string $description, Activity $activity): string
+    protected function replacePlaceholders(string $description, AuditLog $activity): string
     {
         return preg_replace_callback('/:[a-z0-9._-]+/i', function ($match) use ($activity) {
             $match = $match[0];

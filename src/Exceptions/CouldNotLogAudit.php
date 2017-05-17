@@ -4,7 +4,7 @@ namespace Jeylabs\AuditLog\Exceptions;
 
 use Exception;
 
-class CouldNotLogActivity extends Exception
+class CouldNotLogAudit extends Exception
 {
     public static function couldNotDetermineUser($id)
     {
