@@ -128,33 +128,37 @@ class AuditLogger
             return;
         }
 
-        $activity = AuditLogServiceProvider::getActivityModelInstance();
+        $auditLog = AuditLogServiceProvider::getAuditLogModelInstance();
 
         if ($this->performedOn) {
-            $activity->subject()->associate($this->performedOn);
+            $auditLog->subject()->associate($this->performedOn);
         }
 
         if ($this->causedBy) {
-            $activity->causer()->associate($this->causedBy);
+            $auditLog->causer()->associate($this->causedBy);
         }
 
-        $activity->properties = $this->properties;
+        $auditLog->properties = $this->properties;
 
-        $activity->description = $this->replacePlaceholders($description, $activity);
+        $auditLog->description = $this->replacePlaceholders($description, $auditLog);
 
-        $activity->ip = request()->ip();
+        $auditLog->ip = request()->ip();
 
-        $activity->log_name = $this->logName;
+        $auditLog->latitude = isset($_COOKIE['audit_latitude']) ? $_COOKIE['audit_latitude'] : null;
 
-        $activity->save();
+        $auditLog->longitude = isset($_COOKIE['audit_longitude']) ? $_COOKIE['audit_longitude'] : null;
 
-        return $activity;
+        $auditLog->log_name = $this->logName;
+
+        $auditLog->save();
+
+        return $auditLog;
     }
 
     /**
      * @param \Illuminate\Database\Eloquent\Model|int|string $modelOrId
      *
-     * @throws \Spatie\Activitylog\Exceptions\CouldNotLogActivity
+     * @throws \Jeylabs\AuditLog\Exceptions\CouldNotLogAudit
      *
      * @return \Illuminate\Database\Eloquent\Model
      */

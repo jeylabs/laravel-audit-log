@@ -29,7 +29,7 @@ class CleanAuditLogCommand extends Command
 
         $cutOffDate = Carbon::now()->subDays($maxAgeInDays)->format('Y-m-d H:i:s');
 
-        $activity = AuditLogServiceProvider::getActivityModelInstance();
+        $activity = AuditLogServiceProvider::getAuditLogModelInstance();
 
         $amountDeleted = $activity::where('created_at', '<', $cutOffDate)->delete();
 

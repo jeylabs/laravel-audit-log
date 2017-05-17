@@ -35,6 +35,7 @@ trait LogsAudit
                     ->performedOn($model)
                     ->withProperties($model->attributeValuesToBeLogged($eventName))
                     ->log($description);
+
             });
         });
     }

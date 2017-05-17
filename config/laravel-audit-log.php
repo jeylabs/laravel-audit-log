@@ -2,6 +2,8 @@
 
 return [
 
+    'route_prefix' => 'audit-log',
+
     /*
      * If set to false, no activities will be saved to the database.
      */
