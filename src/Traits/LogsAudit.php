@@ -14,7 +14,7 @@ trait LogsAudit
 {
     use DetectsChanges;
 
-    protected static function bootLogsActivity()
+    protected static function bootLogsAudit()
     {
         static::eventsToBeRecorded()->each(function ($eventName) {
             return static::$eventName(function (Model $model) use ($eventName) {
@@ -39,7 +39,7 @@ trait LogsAudit
         });
     }
 
-    public function activity(): MorphMany
+    public function auditLog(): MorphMany
     {
         return $this->morphMany(AuditLogServiceProvider::determineAuditLogModel(), 'subject');
     }
