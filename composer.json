@@ -1,0 +1,53 @@
+{
+    "name": "jeylabs/laravel-audit-log",
+    "description": "A very simple audit logger to monitor the users of your website or application",
+    "homepage": "https://github.com/jeylabs/laravel-audit-log",
+    "keywords":
+    [
+        "jeylabs",
+        "log",
+        "user",
+        "activity",
+        "audit",
+        "laravel"
+    ],
+    "authors": [
+        {
+            "name": "jeylabs",
+            "email": "ratheep.ceymplon@jeylabs.com.au",
+            "homepage": "https://jeylabs.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php" : "^7.0",
+        "illuminate/config": "~5.1.0|~5.2.0|~5.3.0|~5.4.0",
+        "illuminate/database": "~5.1.0|~5.2.0|~5.3.0|~5.4.0",
+        "illuminate/support": "~5.1.0|~5.2.0|~5.3.0|~5.4.0",
+        "spatie/string": "^2.1"
+
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7",
+        "orchestra/testbench": "~3.3.0|~3.4.0",
+        "orchestra/database": "~3.3.0|~3.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jeylabs\\AuditLog\\": "src"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Jeylabs\\AuditLog\\Test\\": "tests"
+        }
+    },
+
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    },
+    "license": "MIT"
+}
