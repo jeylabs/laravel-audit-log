@@ -1,11 +1,17 @@
 <?php
 
 return [
-
+    /**
+     * You can specify the route prefix
+     */
     'route_prefix' => 'audit-log',
+    /**
+     * When user visit every url update audit log
+     */
+    'record_visiting' => false,
 
     /*
-     * If set to false, no activities will be saved to the database.
+     * If set to false, no audits will be saved to the database.
      */
     'enabled' => env('AUDIT_LOGGER_ENABLED', true),
 
@@ -36,5 +42,5 @@ return [
      * This model will be used to log audit. The only requirement is that
      * it should be or extend the \Jeylabs\AuditLog\Models\AuditLog model.
      */
-    'activity_model' => \Jeylabs\AuditLog\Models\AuditLog::class,
+    'audit_log_model' => \Jeylabs\AuditLog\Models\AuditLog::class,
 ];

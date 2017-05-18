@@ -33,7 +33,7 @@ class AuditLogServiceProvider extends ServiceProvider
 
     public static function determineAuditLogModel(): string
     {
-        $activityModel = config('laravel-audit-log.activity_model') ?? AuditLog::class;
+        $activityModel = config('laravel-audit-log.audit_log_model') ?? AuditLog::class;
 
         if (! is_a($activityModel, AuditLog::class, true)) {
             throw InvalidConfiguration::modelIsNotValid($activityModel);
