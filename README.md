@@ -46,11 +46,11 @@ Calling `$auditLog->changes` will return this array:
 [
    'attributes' => [
         'name' => 'updated name',
-        'text' => 'Lorum',
+        'text' => 'New Text',
     ],
     'old' => [
         'name' => 'original name',
-        'text' => 'Lorum',
+        'text' => 'Old text',
     ],
 ];
 ```
@@ -172,7 +172,7 @@ Let's see what gets logged when creating an instance of that model.
 ```php
 $newsItem = NewsItem::create([
    'name' => 'original name',
-   'text' => 'Lorum'
+   'text' => 'New Text'
 ]);
 
 //creating the newsItem will cause an activity being logged
@@ -180,7 +180,7 @@ $auditLog = AuditLog::all()->last();
 
 $auditLog->description; //returns 'created'
 $auditLog->subject; //returns the instance of NewsItem that was created
-$auditLog->changes; //returns ['attributes' => ['name' => 'original name', 'text' => 'Lorum']];
+$auditLog->changes; //returns ['attributes' => ['name' => 'original name', 'text' => 'Text']];
 ```
 
 Now let's update some that `$newsItem`.
@@ -219,7 +219,7 @@ $newsItem->delete();
 $auditLog = AuditLog::all()->last();
 
 $auditLog->description; //returns 'deleted'
-$auditLog->changes; //returns ['attributes' => ['name' => 'updated name', 'text' => 'Lorum']];
+$auditLog->changes; //returns ['attributes' => ['name' => 'updated name', 'text' => 'Text']];
 ```
 
 ## Customizing the events being logged
