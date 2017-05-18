@@ -4,8 +4,6 @@
     auditLogVariables.activity_log_id = null;
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(updateLocation, showError, {
-            maximumAge: 60000,
-            timeout: 5000,
             enableHighAccuracy: true
         });
     } else {
