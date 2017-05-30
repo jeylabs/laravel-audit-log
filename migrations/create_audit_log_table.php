@@ -21,7 +21,9 @@ class CreateAuditLogTable extends Migration
             $table->text('properties')->nullable();
             $table->string('ip')->nullable();
             $table->string('latitude')->nullable();
+            $table->string('original_latitude')->nullable();
             $table->string('longitude')->nullable();
+            $table->string('original_longitude')->nullable();
             $table->timestamps();
 
             $table->index('log_name');

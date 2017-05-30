@@ -146,7 +146,11 @@ class AuditLogger
 
         $auditLog->latitude = isset($_COOKIE['audit_latitude']) ? $_COOKIE['audit_latitude'] : null;
 
+        $auditLog->original_latitude = isset($_COOKIE['audit_latitude']) ? $_COOKIE['audit_latitude'] : null;
+
         $auditLog->longitude = isset($_COOKIE['audit_longitude']) ? $_COOKIE['audit_longitude'] : null;
+
+        $auditLog->original_longitude = isset($_COOKIE['audit_longitude']) ? $_COOKIE['audit_longitude'] : null;
 
         $auditLog->log_name = $this->logName;
 
