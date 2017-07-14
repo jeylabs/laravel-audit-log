@@ -323,7 +323,7 @@ Changing only `name` means only the `name` attribute will be logged in the activ
 
 ## Using the CausesAudit trait
 
-The package ships with a `CausesAudit` trait which can be added to any model that you use as a causer. It provides an `activity` relationship which returns all activities that are caused by the model.
+The package ships with a `CausesAudit` trait which can be added to any model that you use as a causer. It provides an `auditLog` relationship which returns all activities that are caused by the model.
 
 If you include it in the `User` model you can simply retrieve all the current users activities like this:
 
