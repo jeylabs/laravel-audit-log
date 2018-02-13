@@ -176,7 +176,7 @@ class AuditLogger
             return $model;
         }
 
-        throw CouldNotLogActivity::couldNotDetermineUser($modelOrId);
+        throw CouldNotLogAudit::couldNotDetermineUser($modelOrId);
     }
 
     protected function replacePlaceholders(string $description, AuditLog $activity): string
