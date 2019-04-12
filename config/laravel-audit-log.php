@@ -43,4 +43,14 @@ return [
      * it should be or extend the \Jeylabs\AuditLog\Models\AuditLog model.
      */
     'audit_log_model' => \Jeylabs\AuditLog\Models\AuditLog::class,
+
+    /*
+   * If set to true, it will store lat/long to the database
+   */
+    'track_location' => true,
+
+    /*
+   * If set to true, it will store ip address to the database
+   */
+    'track_ip' => true,
 ];

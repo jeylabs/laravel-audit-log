@@ -94,7 +94,7 @@ class AuditLogger
 
     /**
      * @param string $key
-     * @param mixed  $value
+     * @param mixed $value
      *
      * @return $this
      */
@@ -124,7 +124,7 @@ class AuditLogger
      */
     public function log(string $description)
     {
-        if (! $this->logEnabled) {
+        if (!$this->logEnabled) {
             return;
         }
 
@@ -142,16 +142,20 @@ class AuditLogger
 
         $auditLog->description = $this->replacePlaceholders($description, $auditLog);
 
-        $auditLog->ip = request()->ip();
+        if (config('laravel-audit-log.track_ip', true)) {
+            $auditLog->ip = request()->ip();
+        }
 
-        $auditLog->latitude = isset($_COOKIE['audit_latitude']) ? $_COOKIE['audit_latitude'] : null;
+        if (config('laravel-audit-log.track_location', true)) {
+            $auditLog->latitude = isset($_COOKIE['audit_latitude']) ? $_COOKIE['audit_latitude'] : null;
 
-        $auditLog->original_latitude = isset($_COOKIE['audit_latitude']) ? $_COOKIE['audit_latitude'] : null;
+            $auditLog->original_latitude = isset($_COOKIE['audit_latitude']) ? $_COOKIE['audit_latitude'] : null;
 
-        $auditLog->longitude = isset($_COOKIE['audit_longitude']) ? $_COOKIE['audit_longitude'] : null;
+            $auditLog->longitude = isset($_COOKIE['audit_longitude']) ? $_COOKIE['audit_longitude'] : null;
 
-        $auditLog->original_longitude = isset($_COOKIE['audit_longitude']) ? $_COOKIE['audit_longitude'] : null;
-
+            $auditLog->original_longitude = isset($_COOKIE['audit_longitude']) ? $_COOKIE['audit_longitude'] : null;
+        }
+        
         $auditLog->log_name = $this->logName;
 
         $auditLog->save();
@@ -162,9 +166,9 @@ class AuditLogger
     /**
      * @param \Illuminate\Database\Eloquent\Model|int|string $modelOrId
      *
+     * @return \Illuminate\Database\Eloquent\Model
      * @throws \Jeylabs\AuditLog\Exceptions\CouldNotLogAudit
      *
-     * @return \Illuminate\Database\Eloquent\Model
      */
     protected function normalizeCauser($modelOrId): Model
     {
@@ -184,9 +188,9 @@ class AuditLogger
         return preg_replace_callback('/:[a-z0-9._-]+/i', function ($match) use ($activity) {
             $match = $match[0];
 
-            $attribute = (string) string($match)->between(':', '.');
+            $attribute = (string)string($match)->between(':', '.');
 
-            if (! in_array($attribute, ['subject', 'causer', 'properties'])) {
+            if (!in_array($attribute, ['subject', 'causer', 'properties'])) {
                 return $match;
             }
 
