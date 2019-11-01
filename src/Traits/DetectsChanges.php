@@ -4,6 +4,8 @@ namespace Jeylabs\AuditLog\Traits;
 
 use Illuminate\Database\Eloquent\Model;
 use Jeylabs\AuditLog\Exceptions\CouldNotLogChanges;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 trait DetectsChanges
 {

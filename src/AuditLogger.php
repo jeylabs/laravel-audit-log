@@ -8,6 +8,7 @@ use Jeylabs\AuditLog\Models\AuditLog;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Config\Repository;
 use Jeylabs\AuditLog\Exceptions\CouldNotLogAudit;
+use Illuminate\Support\Str;
 
 class AuditLogger
 {

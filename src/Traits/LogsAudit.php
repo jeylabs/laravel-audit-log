@@ -9,6 +9,7 @@ use Jeylabs\AuditLog\Models\AuditLog;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Jeylabs\AuditLog\AuditLogServiceProvider;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Arr;
 
 trait LogsAudit
 {
