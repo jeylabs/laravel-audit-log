@@ -38,7 +38,7 @@ class AuditLogger
 
         $authDriver = $config['laravel-audit-log']['default_auth_driver'] ?? $auth->getDefaultDriver();
 
-        if (starts_with(app()->version(), '5.1')) {
+        if (Str::startsWith(app()->version(), '5.1')) {
             $this->causedBy = $auth->driver($authDriver)->user();
         } else {
             $this->causedBy = $auth->guard($authDriver)->user();
