@@ -1,53 +1,50 @@
 {
-    "name": "jeylabs/laravel-audit-log",
-    "description": "A very simple audit logger to monitor the users of your website or application",
-    "homepage": "https://github.com/jeylabs/laravel-audit-log",
-    "keywords":
-    [
-        "jeylabs",
-        "log",
-        "user",
-        "activity",
-        "audit",
-        "laravel"
-    ],
-    "authors": [
-        {
-            "name": "jeylabs",
-            "email": "ratheep.ceymplon@jeylabs.com.au",
-            "homepage": "https://jeylabs.com",
-            "role": "Developer"
-        }
-    ],
-    "require": {
-        "php" : "^7.0",
-        "illuminate/config": "5.0.*|5.1.*|5.2.*|5.3.*|5.4.*|5.5.*|5.6.*|5.7.*|5.8.*|6.1.*|6.2.*|6.3.*|6.4.*",
-        "illuminate/database": "5.0.*|5.1.*|5.2.*|5.3.*|5.4.*|5.5.*|5.6.*|5.7.*|5.8.*|6.1.*|6.2.*|6.3.*|6.4.*",
-        "illuminate/support": "5.0.*|5.1.*|5.2.*|5.3.*|5.4.*|5.5.*|5.6.*|5.7.*|5.8.*|6.1.*|6.2.*|6.3.*|6.4.*",
-        "spatie/string": "^2.1"
-
+  "name": "jeylabs/laravel-audit-log",
+  "description": "A very simple audit logger to monitor the users of your website or application",
+  "homepage": "https://github.com/jeylabs/laravel-audit-log",
+  "keywords": [
+    "jeylabs",
+    "log",
+    "user",
+    "activity",
+    "audit",
+    "laravel"
+  ],
+  "authors": [
+    {
+      "name": "jeylabs",
+      "email": "ratheep.ceymplon@jeylabs.com.au",
+      "homepage": "https://jeylabs.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^7.0",
+    "illuminate/config": "^5.0|^6.0",
+    "illuminate/database": "^5.0|^6.0",
+    "illuminate/support": "^5.0|^6.0",
+    "spatie/string": "^2.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5.7",
+    "orchestra/testbench": "~3.3.0|~3.4.0",
+    "orchestra/database": "~3.3.0|~3.4.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Jeylabs\\AuditLog\\": "src"
     },
-    "require-dev": {
-        "phpunit/phpunit": "^5.7",
-        "orchestra/testbench": "~3.3.0|~3.4.0",
-        "orchestra/database": "~3.3.0|~3.4.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "Jeylabs\\AuditLog\\": "src"
-        },
-        "files": [
-            "src/helpers.php"
-        ]
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Jeylabs\\AuditLog\\Test\\": "tests"
-        }
-    },
-
-    "scripts": {
-        "test": "vendor/bin/phpunit"
-    },
-    "license": "MIT"
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Jeylabs\\AuditLog\\Test\\": "tests"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit"
+  },
+  "license": "MIT"
 }
