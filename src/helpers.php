@@ -2,7 +2,7 @@
 
 use Jeylabs\AuditLog\AuditLogger;
 
-if (! function_exists('activity')) {
+if (!function_exists('activity')) {
     function activity(string $logName = null): AuditLogger
     {
         $defaultLogName = config('laravel-audit-log.default_log_name');
@@ -10,7 +10,7 @@ if (! function_exists('activity')) {
     }
 }
 
-if (! function_exists('auditLog')) {
+if (!function_exists('auditLog')) {
     function auditLog(string $logName = null): AuditLogger
     {
         $defaultLogName = config('laravel-audit-log.default_log_name');

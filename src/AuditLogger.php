@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Jeylabs\AuditLog\Models\AuditLog;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Config\Repository;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Jeylabs\AuditLog\Exceptions\CouldNotLogAudit;
 
 class AuditLogger
@@ -38,7 +40,7 @@ class AuditLogger
 
         $authDriver = $config['laravel-audit-log']['default_auth_driver'] ?? $auth->getDefaultDriver();
 
-        if (starts_with(app()->version(), '5.1')) {
+        if (Str::startsWith(app()->version(), '5.1')) {
             $this->causedBy = $auth->driver($authDriver)->user();
         } else {
             $this->causedBy = $auth->guard($authDriver)->user();
@@ -155,7 +157,7 @@ class AuditLogger
 
             $auditLog->original_longitude = isset($_COOKIE['audit_longitude']) ? $_COOKIE['audit_longitude'] : null;
         }
-        
+
         $auditLog->log_name = $this->logName;
 
         $auditLog->save();
@@ -188,7 +190,7 @@ class AuditLogger
         return preg_replace_callback('/:[a-z0-9._-]+/i', function ($match) use ($activity) {
             $match = $match[0];
 
-            $attribute = (string)string($match)->between(':', '.');
+            $attribute = (string) string($match)->between(':', '.');
 
             if (!in_array($attribute, ['subject', 'causer', 'properties'])) {
                 return $match;
@@ -204,7 +206,7 @@ class AuditLogger
 
             $attributeValue = $attributeValue->toArray();
 
-            return array_get($attributeValue, $propertyName, $match);
+            return Arr::get($attributeValue, $propertyName, $match);
         }, $description);
     }
 }

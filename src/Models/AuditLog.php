@@ -1,10 +1,12 @@
 <?php
+
 namespace Jeylabs\AuditLog\Models;
 
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Arr;
 
 class AuditLog extends Model
 {
@@ -39,7 +41,7 @@ class AuditLog extends Model
      */
     public function getExtraProperty(string $propertyName)
     {
-        return array_get($this->properties->toArray(), $propertyName);
+        return Arr::get($this->properties->toArray(), $propertyName);
     }
 
     public function getChangesAttribute(): Collection

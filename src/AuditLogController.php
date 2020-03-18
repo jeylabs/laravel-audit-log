@@ -17,23 +17,22 @@ class AuditLogController extends Controller
 
         $auditLatitude = $request->input('audit_latitude');
         $auditLongitude = $request->input('audit_longitude');
-        if($auditLatitude){
+        if ($auditLatitude) {
             setcookie('audit_latitude', $auditLatitude, time() + (86400 * 30), "/");
         }
-        if ($auditLongitude){
+        if ($auditLongitude) {
             setcookie('audit_longitude', $auditLongitude, time() + (86400 * 30), "/");
         }
         $oldAuditLatitude = isset($_COOKIE['audit_latitude']) ? $_COOKIE['audit_latitude'] : null;
         $oldAuditLongitude = isset($_COOKIE['audit_longitude']) ? $_COOKIE['audit_longitude'] : null;
 
-        if ($recordVisiting){
+        if ($recordVisiting) {
             $auditLog = AuditLog::find($request->input('audit_id'));
-            if ($auditLog && $trackLocation){
+            if ($auditLog && $trackLocation) {
                 $auditLog->latitude = $auditLatitude ? $auditLatitude : $oldAuditLatitude;
                 $auditLog->longitude = $auditLongitude ? $auditLongitude : $oldAuditLongitude;
             }
             $auditLog->save();
         }
-
     }
 }

@@ -3,6 +3,7 @@
 namespace Jeylabs\AuditLog\Traits;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Jeylabs\AuditLog\Exceptions\CouldNotLogChanges;
 
 trait DetectsChanges
@@ -25,7 +26,7 @@ trait DetectsChanges
 
     public function attributesToBeLogged(): array
     {
-        if (! isset(static::$logAttributes)) {
+        if (!isset(static::$logAttributes)) {
             return [];
         }
 
@@ -34,7 +35,7 @@ trait DetectsChanges
 
     public function shouldlogOnlyDirty(): bool
     {
-        if (! isset(static::$logOnlyDirty)) {
+        if (!isset(static::$logOnlyDirty)) {
             return false;
         }
 
@@ -43,7 +44,7 @@ trait DetectsChanges
 
     public function attributeValuesToBeLogged(string $processingEvent): array
     {
-        if (! count($this->attributesToBeLogged())) {
+        if (!count($this->attributesToBeLogged())) {
             return [];
         }
 
@@ -57,12 +58,12 @@ trait DetectsChanges
 
         if ($this->shouldlogOnlyDirty() && isset($properties['old'])) {
             $properties['attributes'] = array_udiff(
-                                            $properties['attributes'],
-                                            $properties['old'],
-                                            function ($new, $old) {
-                                                return $new <=> $old;
-                                            }
-                                        );
+                $properties['attributes'],
+                $properties['old'],
+                function ($new, $old) {
+                    return $new <=> $old;
+                }
+            );
             $properties['old'] = collect($properties['old'])->only(array_keys($properties['attributes']))->all();
         }
 
@@ -73,7 +74,7 @@ trait DetectsChanges
     {
         $changes = [];
         foreach ($model->attributesToBeLogged() as $attribute) {
-            if (str_contains($attribute, '.')) {
+            if (Str::contains($attribute, '.')) {
                 $changes += self::getRelatedModelAttributeValue($model, $attribute);
             } else {
                 $changes += collect($model)->only($attribute)->toArray();

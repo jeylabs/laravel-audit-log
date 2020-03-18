@@ -35,7 +35,7 @@ class AuditLogServiceProvider extends ServiceProvider
     {
         $activityModel = config('laravel-audit-log.audit_log_model') ?? AuditLog::class;
 
-        if (! is_a($activityModel, AuditLog::class, true)) {
+        if (!is_a($activityModel, AuditLog::class, true)) {
             throw InvalidConfiguration::modelIsNotValid($activityModel);
         }
 
@@ -52,18 +52,18 @@ class AuditLogServiceProvider extends ServiceProvider
     protected function publishMigrationsAndConfig()
     {
         $this->publishes([
-            __DIR__.'/../config/laravel-audit-log.php' => config_path('laravel-audit-log.php'),
+            __DIR__ . '/../config/laravel-audit-log.php' => config_path('laravel-audit-log.php'),
         ], 'config');
 
-        $this->mergeConfigFrom(__DIR__.'/../config/laravel-audit-log.php', 'laravel-audit-log');
+        $this->mergeConfigFrom(__DIR__ . '/../config/laravel-audit-log.php', 'laravel-audit-log');
 
-        $this->loadViewsFrom(__DIR__.'/../views', 'laravel-audit-log');
+        $this->loadViewsFrom(__DIR__ . '/../views', 'laravel-audit-log');
 
-        if (! class_exists('CreateAuditLogTable')) {
+        if (!class_exists('CreateAuditLogTable')) {
             $timestamp = date('Y_m_d_His', time());
 
             $this->publishes([
-                __DIR__.'/../migrations/create_audit_log_table.php' => database_path("/migrations/{$timestamp}_create_audit_log_table.php"),
+                __DIR__ . '/../migrations/create_audit_log_table.php' => database_path("/migrations/{$timestamp}_create_audit_log_table.php"),
             ], 'migrations');
         }
     }
@@ -73,8 +73,7 @@ class AuditLogServiceProvider extends ServiceProvider
         $config = [];
         $config['prefix'] = $this->app['config']->get('laravel-audit-log.route_prefix', []);
         $config['namespace'] = 'Jeylabs\AuditLog';
-        Route::group($config, function()
-        {
+        Route::group($config, function () {
             Route::post('/push-location', 'AuditLogController@pushLocation')->name('audit.log.push.location');
         });
     }

@@ -9,6 +9,7 @@ use Jeylabs\AuditLog\Models\AuditLog;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Jeylabs\AuditLog\AuditLogServiceProvider;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Arr;
 
 trait LogsAudit
 {
@@ -18,7 +19,7 @@ trait LogsAudit
     {
         static::eventsToBeRecorded()->each(function ($eventName) {
             return static::$eventName(function (Model $model) use ($eventName) {
-                if (! $model->shouldLogEvent($eventName)) {
+                if (!$model->shouldLogEvent($eventName)) {
                     return;
                 }
 
@@ -35,7 +36,6 @@ trait LogsAudit
                     ->performedOn($model)
                     ->withProperties($model->attributeValuesToBeLogged($eventName))
                     ->log($description);
-
             });
         });
     }
@@ -79,7 +79,7 @@ trait LogsAudit
 
     public function attributesToBeIgnored(): array
     {
-        if (! isset(static::$ignoreChangedAttributes)) {
+        if (!isset(static::$ignoreChangedAttributes)) {
             return [];
         }
 
@@ -88,17 +88,17 @@ trait LogsAudit
 
     protected function shouldLogEvent(string $eventName): bool
     {
-        if (! in_array($eventName, ['created', 'updated'])) {
+        if (!in_array($eventName, ['created', 'updated'])) {
             return true;
         }
 
-        if (array_has($this->getDirty(), 'deleted_at')) {
+        if (Arr::has($this->getDirty(), 'deleted_at')) {
             if ($this->getDirty()['deleted_at'] === null) {
                 return false;
             }
         }
 
         //do not log update event if only ignored attributes are changed
-        return (bool) count(array_except($this->getDirty(), $this->attributesToBeIgnored()));
+        return (bool) count(Arr::except($this->getDirty(), $this->attributesToBeIgnored()));
     }
 }
