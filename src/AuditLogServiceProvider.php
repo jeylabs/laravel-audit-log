@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Jeylabs\AuditLog\Models\AuditLog;
 use Jeylabs\AuditLog\Exceptions\InvalidConfiguration;
+use Jeylabs\AuditLog\AuditLogController;
 
 class AuditLogServiceProvider extends ServiceProvider
 {
@@ -59,7 +60,7 @@ class AuditLogServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__ . '/../views', 'laravel-audit-log');
 
-        if (!class_exists('CreateAuditLogTable')) {
+        if (!$this->migrationAlreadyPublished()) {
             $timestamp = date('Y_m_d_His', time());
 
             $this->publishes([
@@ -68,13 +69,17 @@ class AuditLogServiceProvider extends ServiceProvider
         }
     }
 
+    protected function migrationAlreadyPublished(): bool
+    {
+        return count(glob(database_path('migrations/*_create_audit_log_table.php'))) > 0;
+    }
+
     protected function installRoutes()
     {
         $config = [];
         $config['prefix'] = $this->app['config']->get('laravel-audit-log.route_prefix', []);
-        $config['namespace'] = 'Jeylabs\AuditLog';
         Route::group($config, function () {
-            Route::post('/push-location', 'AuditLogController@pushLocation')->name('audit.log.push.location');
+            Route::post('/push-location', [AuditLogController::class, 'pushLocation'])->name('audit.log.push.location');
         });
     }
 }

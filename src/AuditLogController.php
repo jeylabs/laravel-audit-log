@@ -3,8 +3,8 @@
 namespace Jeylabs\AuditLog;
 
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use Jeylabs\AuditLog\Models\AuditLog;
 
 class AuditLogController extends Controller
@@ -28,10 +28,16 @@ class AuditLogController extends Controller
 
         if ($recordVisiting) {
             $auditLog = AuditLog::find($request->input('audit_id'));
-            if ($auditLog && $trackLocation) {
+
+            if (!$auditLog) {
+                return;
+            }
+
+            if ($trackLocation) {
                 $auditLog->latitude = $auditLatitude ? $auditLatitude : $oldAuditLatitude;
                 $auditLog->longitude = $auditLongitude ? $auditLongitude : $oldAuditLongitude;
             }
+
             $auditLog->save();
         }
     }

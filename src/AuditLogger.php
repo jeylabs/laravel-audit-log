@@ -40,11 +40,7 @@ class AuditLogger
 
         $authDriver = $config['laravel-audit-log']['default_auth_driver'] ?? $auth->getDefaultDriver();
 
-        if (Str::startsWith(app()->version(), '5.1')) {
-            $this->causedBy = $auth->driver($authDriver)->user();
-        } else {
-            $this->causedBy = $auth->guard($authDriver)->user();
-        }
+        $this->causedBy = $auth->guard($authDriver)->user();
 
         $this->logName = $config['laravel-audit-log']['default_log_name'];
 
@@ -190,7 +186,7 @@ class AuditLogger
         return preg_replace_callback('/:[a-z0-9._-]+/i', function ($match) use ($activity) {
             $match = $match[0];
 
-            $attribute = (string) string($match)->between(':', '.');
+            $attribute = (string) Str::of($match)->between(':', '.');
 
             if (!in_array($attribute, ['subject', 'causer', 'properties'])) {
                 return $match;
