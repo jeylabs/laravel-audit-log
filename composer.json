@@ -28,7 +28,13 @@
   "require-dev": {
     "ext-json": "*",
     "orchestra/testbench": "^11.0",
-    "phpunit/phpunit": "^11.0"
+    "phpunit/phpunit": "^11.0",
+    "mongodb/laravel-mongodb": "^5.0",
+    "async-aws/dynamo-db": "^3.11"
+  },
+  "suggest": {
+    "mongodb/laravel-mongodb": "Required to use the mongodb audit log driver (laravel-audit-log.driver = mongodb).",
+    "async-aws/dynamo-db": "Required to use the default DynamoDB client for the dynamodb audit log driver (laravel-audit-log.driver = dynamodb), unless you bind your own Jeylabs\\AuditLog\\Contracts\\DynamoDbClient."
   },
   "autoload": {
     "psr-4": {

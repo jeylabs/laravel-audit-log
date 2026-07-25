@@ -16,4 +16,14 @@ class AuditLoggerTest extends TestCase
         $fetched = AuditLog::first();
         $this->assertSame('Hello bar world', $fetched->description);
     }
+
+    public function test_it_returns_early_without_writing_when_disabled(): void
+    {
+        config(['laravel-audit-log.enabled' => false]);
+
+        $result = auditLog()->log('should not be stored');
+
+        $this->assertNull($result);
+        $this->assertSame(0, AuditLog::count());
+    }
 }

@@ -137,10 +137,12 @@ return [
 
     /*
      * This model will be used to log audit. The only requirement is that
-     * it should be or extend the \Jeylabs\AuditLog\Models\AuditLog model.
+     * it should implement \Jeylabs\AuditLog\Contracts\AuditLogModel.
+     * Only used by the eloquent driver; kept for backwards compatibility,
+     * prefer 'stores.eloquent.model' below.
      */
     'audit_log_model' => \Jeylabs\AuditLog\Models\AuditLog::class,
-    
+
     /*
      * If set to true, it will store lat/long to the database
      */
@@ -150,8 +152,74 @@ return [
      * If set to true, it will store ip address to the database
      */
     'track_ip' => true,
+
+    /*
+     * Which storage backend to write/read audit logs through.
+     * Supported: 'eloquent', 'mongodb', 'dynamodb'.
+     */
+    'driver' => env('AUDIT_LOGGER_DRIVER', 'eloquent'),
+
+    'stores' => [
+        'eloquent' => [
+            'model' => \Jeylabs\AuditLog\Models\AuditLog::class,
+        ],
+        'mongodb' => [
+            'connection' => env('AUDIT_LOGGER_MONGODB_CONNECTION', 'mongodb'),
+            'model' => \Jeylabs\AuditLog\Models\MongoAuditLog::class,
+        ],
+        'dynamodb' => [
+            'region' => env('AUDIT_LOGGER_DYNAMODB_REGION', 'us-east-1'),
+            'table' => env('AUDIT_LOGGER_DYNAMODB_TABLE', 'audit_logs'),
+            'causer_index' => 'causer_index',
+            'subject_index' => 'subject_index',
+            'endpoint' => env('AUDIT_LOGGER_DYNAMODB_ENDPOINT'),
+            'credentials' => [
+                'key' => env('AUDIT_LOGGER_DYNAMODB_KEY'),
+                'secret' => env('AUDIT_LOGGER_DYNAMODB_SECRET'),
+            ],
+            'delete_records_older_than_days_via_ttl' => null,
+            'ttl_attribute' => 'ttl',
+        ],
+    ],
 ];
 ```
+
+---
+Storing and accessing audit logs in MySQL, PostgreSQL, MongoDB, or DynamoDB
+---
+
+Every write goes through the `Jeylabs\AuditLog\Contracts\AuditLogStore` contract, and which concrete backend it talks to is picked by `laravel-audit-log.driver`. `auditLog()->log(...)`, `LogsAudit`'s automatic model-event logging, `CausesAudit`, the `auditlog:clean` command, and the visitor-location controller all work the same way regardless of driver — only the driver-specific setup below changes.
+
+### MySQL / PostgreSQL (and SQLite, SQL Server)
+
+This is the default `eloquent` driver and needs nothing beyond the standard installation above — Eloquent is database-agnostic, so pointing your app's default database connection at MySQL or PostgreSQL (any currently supported version) just works. `subject()`/`causer()` relations, `AuditLog::causedBy()`/`forSubject()`/`inLog()` scopes, and `$user->auditLog`/`$user->activity` (via `LogsAudit`/`CausesAudit`) are all fully supported.
+
+### MongoDB
+
+1. `composer require mongodb/laravel-mongodb` (and the PHP `mongodb` extension) — not a dependency of this package, since most apps don't need it.
+2. Configure a `mongodb` connection in `config/database.php` per that package's docs.
+3. Set `AUDIT_LOGGER_DRIVER=mongodb` (or `'driver' => 'mongodb'` in the published config).
+
+Audit logs are then written through `Jeylabs\AuditLog\Models\MongoAuditLog`, which mirrors the SQL `AuditLog` model (same relations, scopes, and casts) on top of `mongodb/laravel-mongodb`'s Eloquent-compatible base model, including cross-database (`subject`/`causer`) relations to your normal SQL models.
+
+### DynamoDB
+
+DynamoDB has no joins or secondary query engine, so `subject()`/`causer()` relations and the `$user->auditLog`/`$user->activity` traits are **not** available under this driver (resolving them throws `InvalidConfiguration`) — use `AuditLogStore::causedBy()`/`forSubject()` directly instead:
+
+```php
+app(\Jeylabs\AuditLog\Contracts\AuditLogStore::class)->causedBy(\App\Models\User::class, $user->id);
+```
+
+Setup:
+
+1. `composer require async-aws/dynamo-db` (a lightweight independent client, not the full `aws/aws-sdk-php`) — or bind your own implementation of `Jeylabs\AuditLog\Contracts\DynamoDbClient` in a service provider if you'd rather use the full AWS SDK or another client.
+2. Provision the table yourself (this package does not create it) with:
+   - Partition key: `id` (String)
+   - A Global Secondary Index named `causer_index` (configurable via `stores.dynamodb.causer_index`) with partition key `causer_key` (String)
+   - A Global Secondary Index named `subject_index` (configurable via `stores.dynamodb.subject_index`) with partition key `subject_key` (String)
+3. Set `AUDIT_LOGGER_DRIVER=dynamodb` and the `AUDIT_LOGGER_DYNAMODB_*` environment variables (region, table, endpoint, credentials).
+
+`auditlog:clean` has no efficient range-delete on DynamoDB, so it falls back to a full table scan for this driver — fine for occasional maintenance, but for production-scale cleanup set `stores.dynamodb.delete_records_older_than_days_via_ttl` to a day count and enable DynamoDB's native TTL on the `ttl` attribute in the table settings; expired items are then removed automatically with no scan needed.
 
 ---
 Logging model events

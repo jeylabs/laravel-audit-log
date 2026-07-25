@@ -4,11 +4,11 @@ namespace Jeylabs\AuditLog;
 
 use Illuminate\Auth\AuthManager;
 use Illuminate\Database\Eloquent\Model;
-use Jeylabs\AuditLog\Models\AuditLog;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Jeylabs\AuditLog\Contracts\AuditLogStore;
 use Jeylabs\AuditLog\Exceptions\CouldNotLogAudit;
 
 class AuditLogger
@@ -32,9 +32,13 @@ class AuditLogger
     /** @var \Illuminate\Support\Collection */
     protected $properties;
 
-    public function __construct(AuthManager $auth, Repository $config)
+    protected AuditLogStore $store;
+
+    public function __construct(AuthManager $auth, Repository $config, AuditLogStore $store)
     {
         $this->auth = $auth;
+
+        $this->store = $store;
 
         $this->properties = collect();
 
@@ -126,39 +130,37 @@ class AuditLogger
             return;
         }
 
-        $auditLog = AuditLogServiceProvider::getAuditLogModelInstance();
+        $attributes = [
+            'log_name' => $this->logName,
+            'description' => $this->replacePlaceholders($description),
+            'properties' => $this->properties,
+        ];
 
         if ($this->performedOn) {
-            $auditLog->subject()->associate($this->performedOn);
+            $attributes['subject_type'] = $this->performedOn->getMorphClass();
+            $attributes['subject_id'] = $this->performedOn->getKey();
         }
 
         if ($this->causedBy) {
-            $auditLog->causer()->associate($this->causedBy);
+            $attributes['causer_type'] = $this->causedBy->getMorphClass();
+            $attributes['causer_id'] = $this->causedBy->getKey();
         }
 
-        $auditLog->properties = $this->properties;
-
-        $auditLog->description = $this->replacePlaceholders($description, $auditLog);
-
         if (config('laravel-audit-log.track_ip', true)) {
-            $auditLog->ip = request()->ip();
+            $attributes['ip'] = request()->ip();
         }
 
         if (config('laravel-audit-log.track_location', true)) {
-            $auditLog->latitude = isset($_COOKIE['audit_latitude']) ? $_COOKIE['audit_latitude'] : null;
+            $latitude = $_COOKIE['audit_latitude'] ?? null;
+            $longitude = $_COOKIE['audit_longitude'] ?? null;
 
-            $auditLog->original_latitude = isset($_COOKIE['audit_latitude']) ? $_COOKIE['audit_latitude'] : null;
-
-            $auditLog->longitude = isset($_COOKIE['audit_longitude']) ? $_COOKIE['audit_longitude'] : null;
-
-            $auditLog->original_longitude = isset($_COOKIE['audit_longitude']) ? $_COOKIE['audit_longitude'] : null;
+            $attributes['latitude'] = $latitude;
+            $attributes['original_latitude'] = $latitude;
+            $attributes['longitude'] = $longitude;
+            $attributes['original_longitude'] = $longitude;
         }
 
-        $auditLog->log_name = $this->logName;
-
-        $auditLog->save();
-
-        return $auditLog;
+        return $this->store->create($attributes);
     }
 
     /**
@@ -181,9 +183,9 @@ class AuditLogger
         throw CouldNotLogAudit::couldNotDetermineUser($modelOrId);
     }
 
-    protected function replacePlaceholders(string $description, AuditLog $activity): string
+    protected function replacePlaceholders(string $description): string
     {
-        return preg_replace_callback('/:[a-z0-9._-]+/i', function ($match) use ($activity) {
+        return preg_replace_callback('/:[a-z0-9._-]+/i', function ($match) {
             $match = $match[0];
 
             $attribute = (string) Str::of($match)->between(':', '.');
@@ -194,7 +196,11 @@ class AuditLogger
 
             $propertyName = substr($match, strpos($match, '.') + 1);
 
-            $attributeValue = $activity->$attribute;
+            $attributeValue = match ($attribute) {
+                'subject' => $this->performedOn,
+                'causer' => $this->causedBy,
+                'properties' => $this->properties,
+            };
 
             if (is_null($attributeValue)) {
                 return $match;
