@@ -50,7 +50,8 @@
     }
   },
   "scripts": {
-    "test": "vendor/bin/phpunit"
+    "test": "vendor/bin/phpunit",
+    "test-dynamodb-local": "vendor/bin/phpunit --group dynamodb-local"
   },
   "license": "MIT"
 }

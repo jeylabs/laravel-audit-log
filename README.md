@@ -221,6 +221,15 @@ Setup:
 
 `auditlog:clean` has no efficient range-delete on DynamoDB, so it falls back to a full table scan for this driver — fine for occasional maintenance, but for production-scale cleanup set `stores.dynamodb.delete_records_older_than_days_via_ttl` to a day count and enable DynamoDB's native TTL on the `ttl` attribute in the table settings; expired items are then removed automatically with no scan needed.
 
+The unit tests mock `Jeylabs\AuditLog\Contracts\DynamoDbClient`, so they need no AWS access. To also exercise the real async-aws wire protocol (marshaling, `CreateTable`/GSIs, queries) against [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html):
+
+```bash
+java -jar DynamoDBLocal.jar -inMemory -port 8000 -sharedDb
+DYNAMODB_LOCAL_ENDPOINT=http://127.0.0.1:8000 composer test-dynamodb-local
+```
+
+`tests/Integration/DynamoDbLocalIntegrationTest.php` skips itself when `DYNAMODB_LOCAL_ENDPOINT` isn't set, so it's a no-op in normal `composer test` runs / CI without a Dynamo endpoint available.
+
 ---
 Logging model events
 ---
