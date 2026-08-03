@@ -202,6 +202,15 @@ This is the default `eloquent` driver and needs nothing beyond the standard inst
 
 Audit logs are then written through `Jeylabs\AuditLog\Models\MongoAuditLog`, which mirrors the SQL `AuditLog` model (same relations, scopes, and casts) on top of `mongodb/laravel-mongodb`'s Eloquent-compatible base model, including cross-database (`subject`/`causer`) relations to your normal SQL models.
 
+The unit tests run the mongodb driver's code path against sqlite (both go through the same `EloquentAuditLogStore`), so they need no MongoDB server. To also exercise the real `mongodb/laravel-mongodb` + `ext-mongodb` stack against a live MongoDB:
+
+```bash
+mongod --dbpath /tmp/mongo-data --port 27017 --bind_ip 127.0.0.1
+MONGODB_LOCAL_URI=mongodb://127.0.0.1:27017 composer test-mongodb-local
+```
+
+`tests/Integration/MongoDbLocalIntegrationTest.php` skips itself when `MONGODB_LOCAL_URI` isn't set (or the `mongodb` extension isn't loaded), so it's a no-op in normal `composer test` runs / CI without a Mongo instance available.
+
 ### DynamoDB
 
 DynamoDB has no joins or secondary query engine, so `subject()`/`causer()` relations and the `$user->auditLog`/`$user->activity` traits are **not** available under this driver (resolving them throws `InvalidConfiguration`) — use `AuditLogStore::causedBy()`/`forSubject()` directly instead:
