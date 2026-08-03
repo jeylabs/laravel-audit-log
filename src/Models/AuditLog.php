@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Arr;
+use Jeylabs\AuditLog\Contracts\AuditLogModel;
 
-class AuditLog extends Model
+class AuditLog extends Model implements AuditLogModel
 {
     protected $table = 'audit_logs';
 
@@ -34,12 +35,8 @@ class AuditLog extends Model
 
     /**
      * Get the extra properties with the given name.
-     *
-     * @param string $propertyName
-     *
-     * @return mixed
      */
-    public function getExtraProperty(string $propertyName)
+    public function getExtraProperty(string $propertyName): mixed
     {
         return Arr::get($this->properties->toArray(), $propertyName);
     }

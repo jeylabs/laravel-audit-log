@@ -5,8 +5,11 @@ namespace Jeylabs\AuditLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Jeylabs\AuditLog\Contracts\AuditLogModel;
+use Jeylabs\AuditLog\Contracts\AuditLogStore;
 use Jeylabs\AuditLog\Models\AuditLog;
 use Jeylabs\AuditLog\Exceptions\InvalidConfiguration;
+use Jeylabs\AuditLog\AuditLogController;
 
 class AuditLogServiceProvider extends ServiceProvider
 {
@@ -24,6 +27,14 @@ class AuditLogServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton(AuditLogStoreManager::class, function ($app) {
+            return new AuditLogStoreManager($app);
+        });
+
+        $this->app->bind(AuditLogStore::class, function ($app) {
+            return $app->make(AuditLogStoreManager::class)->driver();
+        });
+
         $this->app->bind('command.auditlog:clean', CleanAuditLogCommand::class);
 
         $this->commands([
@@ -31,11 +42,25 @@ class AuditLogServiceProvider extends ServiceProvider
         ]);
     }
 
+    /**
+     * Resolve the Eloquent-based model class used by the CausesAudit/
+     * LogsAudit traits' `activity()`/`auditLog()` relations. Only
+     * meaningful for the eloquent and mongodb drivers, since dynamodb
+     * has no joins to build a relation from.
+     */
     public static function determineAuditLogModel(): string
     {
-        $activityModel = config('laravel-audit-log.audit_log_model') ?? AuditLog::class;
+        $driver = config('laravel-audit-log.driver', 'eloquent');
 
-        if (!is_a($activityModel, AuditLog::class, true)) {
+        if ($driver === 'dynamodb') {
+            throw InvalidConfiguration::modelRelationsUnsupportedForDriver($driver);
+        }
+
+        $activityModel = config("laravel-audit-log.stores.{$driver}.model")
+            ?? config('laravel-audit-log.audit_log_model')
+            ?? AuditLog::class;
+
+        if (!is_a($activityModel, AuditLogModel::class, true)) {
             throw InvalidConfiguration::modelIsNotValid($activityModel);
         }
 
@@ -59,7 +84,7 @@ class AuditLogServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__ . '/../views', 'laravel-audit-log');
 
-        if (!class_exists('CreateAuditLogTable')) {
+        if (!$this->migrationAlreadyPublished()) {
             $timestamp = date('Y_m_d_His', time());
 
             $this->publishes([
@@ -68,13 +93,17 @@ class AuditLogServiceProvider extends ServiceProvider
         }
     }
 
+    protected function migrationAlreadyPublished(): bool
+    {
+        return count(glob(database_path('migrations/*_create_audit_log_table.php'))) > 0;
+    }
+
     protected function installRoutes()
     {
         $config = [];
         $config['prefix'] = $this->app['config']->get('laravel-audit-log.route_prefix', []);
-        $config['namespace'] = 'Jeylabs\AuditLog';
         Route::group($config, function () {
-            Route::post('/push-location', 'AuditLogController@pushLocation')->name('audit.log.push.location');
+            Route::post('/push-location', [AuditLogController::class, 'pushLocation'])->name('audit.log.push.location');
         });
     }
 }
