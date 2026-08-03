@@ -4,6 +4,7 @@ namespace Jeylabs\AuditLog;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Jeylabs\AuditLog\Contracts\AuditLogStore;
 
 class CleanAuditLogCommand extends Command
 {
@@ -21,17 +22,15 @@ class CleanAuditLogCommand extends Command
      */
     protected $description = 'Clean up old records from the audit log.';
 
-    public function handle()
+    public function handle(AuditLogStore $store)
     {
         $this->comment('Cleaning audit log...');
 
         $maxAgeInDays = config('laravel-audit-log.delete_records_older_than_days');
 
-        $cutOffDate = Carbon::now()->subDays($maxAgeInDays)->format('Y-m-d H:i:s');
+        $cutOffDate = Carbon::now()->subDays($maxAgeInDays);
 
-        $activity = AuditLogServiceProvider::getAuditLogModelInstance();
-
-        $amountDeleted = $activity::where('created_at', '<', $cutOffDate)->delete();
+        $amountDeleted = $store->deleteOlderThan($cutOffDate);
 
         $this->info("Deleted {$amountDeleted} record(s) from the audit log.");
 
