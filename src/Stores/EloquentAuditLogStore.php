@@ -70,8 +70,16 @@ class EloquentAuditLogStore implements AuditLogStore
 
     public function deleteOlderThan(DateTimeInterface $cutoff): int
     {
+        // Model::fromDateTime() is the connection-aware conversion: SQL
+        // models format it as a grammar-matching string, while
+        // MongoAuditLog (backed by mongodb/laravel-mongodb) returns a
+        // MongoDB\BSON\UTCDateTime. A hardcoded string comparison works
+        // for SQL but silently matches nothing against Mongo's
+        // BSON-typed created_at, since BSON compares by type first.
+        $cutoff = $this->newModelInstance()->fromDateTime($cutoff);
+
         return $this->modelClass::query()
-            ->where('created_at', '<', $cutoff->format('Y-m-d H:i:s'))
+            ->where('created_at', '<', $cutoff)
             ->delete();
     }
 

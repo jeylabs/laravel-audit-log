@@ -194,6 +194,15 @@ Every write goes through the `Jeylabs\AuditLog\Contracts\AuditLogStore` contract
 
 This is the default `eloquent` driver and needs nothing beyond the standard installation above — Eloquent is database-agnostic, so pointing your app's default database connection at MySQL or PostgreSQL (any currently supported version) just works. `subject()`/`causer()` relations, `AuditLog::causedBy()`/`forSubject()`/`inLog()` scopes, and `$user->auditLog`/`$user->activity` (via `LogsAudit`/`CausesAudit`) are all fully supported.
 
+The unit tests exercise this same `EloquentAuditLogStore` code path against sqlite. To also run it against a live MySQL or PostgreSQL server (catches anything sqlite's more lenient typing papers over):
+
+```bash
+MYSQL_LOCAL_DSN=mysql://user:pass@127.0.0.1:3306/audit_log_it composer test-mysql-local
+POSTGRES_LOCAL_DSN=pgsql://user:pass@127.0.0.1:5432/audit_log_it composer test-postgres-local
+```
+
+`tests/Integration/MySqlLocalIntegrationTest.php` and `tests/Integration/PostgresLocalIntegrationTest.php` skip themselves when their respective env var isn't set, so they're a no-op in normal `composer test` runs / CI without those servers available.
+
 ### MongoDB
 
 1. `composer require mongodb/laravel-mongodb` (and the PHP `mongodb` extension) — not a dependency of this package, since most apps don't need it.
@@ -201,6 +210,15 @@ This is the default `eloquent` driver and needs nothing beyond the standard inst
 3. Set `AUDIT_LOGGER_DRIVER=mongodb` (or `'driver' => 'mongodb'` in the published config).
 
 Audit logs are then written through `Jeylabs\AuditLog\Models\MongoAuditLog`, which mirrors the SQL `AuditLog` model (same relations, scopes, and casts) on top of `mongodb/laravel-mongodb`'s Eloquent-compatible base model, including cross-database (`subject`/`causer`) relations to your normal SQL models.
+
+The unit tests run the mongodb driver's code path against sqlite (both go through the same `EloquentAuditLogStore`), so they need no MongoDB server. To also exercise the real `mongodb/laravel-mongodb` + `ext-mongodb` stack against a live MongoDB:
+
+```bash
+mongod --dbpath /tmp/mongo-data --port 27017 --bind_ip 127.0.0.1
+MONGODB_LOCAL_URI=mongodb://127.0.0.1:27017 composer test-mongodb-local
+```
+
+`tests/Integration/MongoDbLocalIntegrationTest.php` skips itself when `MONGODB_LOCAL_URI` isn't set (or the `mongodb` extension isn't loaded), so it's a no-op in normal `composer test` runs / CI without a Mongo instance available.
 
 ### DynamoDB
 
@@ -220,6 +238,15 @@ Setup:
 3. Set `AUDIT_LOGGER_DRIVER=dynamodb` and the `AUDIT_LOGGER_DYNAMODB_*` environment variables (region, table, endpoint, credentials).
 
 `auditlog:clean` has no efficient range-delete on DynamoDB, so it falls back to a full table scan for this driver — fine for occasional maintenance, but for production-scale cleanup set `stores.dynamodb.delete_records_older_than_days_via_ttl` to a day count and enable DynamoDB's native TTL on the `ttl` attribute in the table settings; expired items are then removed automatically with no scan needed.
+
+The unit tests mock `Jeylabs\AuditLog\Contracts\DynamoDbClient`, so they need no AWS access. To also exercise the real async-aws wire protocol (marshaling, `CreateTable`/GSIs, queries) against [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html):
+
+```bash
+java -jar DynamoDBLocal.jar -inMemory -port 8000 -sharedDb
+DYNAMODB_LOCAL_ENDPOINT=http://127.0.0.1:8000 composer test-dynamodb-local
+```
+
+`tests/Integration/DynamoDbLocalIntegrationTest.php` skips itself when `DYNAMODB_LOCAL_ENDPOINT` isn't set, so it's a no-op in normal `composer test` runs / CI without a Dynamo endpoint available.
 
 ---
 Logging model events
