@@ -49,6 +49,13 @@
       "Jeylabs\\AuditLog\\Test\\": "tests"
     }
   },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Jeylabs\\AuditLog\\AuditLogServiceProvider"
+      ]
+    }
+  },
   "scripts": {
     "test": "vendor/bin/phpunit",
     "test-dynamodb-local": "vendor/bin/phpunit --group dynamodb-local",

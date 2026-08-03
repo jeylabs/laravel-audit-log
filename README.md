@@ -58,20 +58,29 @@ Calling `$auditLog->changes` will return this array:
 
 ## Installation
 
-You can install the package via composer:
+This fork is not published on Packagist under its own name — the `jeylabs/laravel-audit-log` name on Packagist points to the original, unmaintained package, so a plain `composer require jeylabs/laravel-audit-log` will **not** get you this fork. Instead, point Composer at this repository directly by adding a VCS repository entry to your app's `composer.json`:
 
-``` bash
-composer require jeylabs/laravel-audit-log
+```json
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/jey-srikantha/laravel-audit-log"
+        }
+    ]
+}
 ```
 
-Next, you must install the service provider:
+Then require it (use a tagged release once one exists; `dev-master` tracks the branch in the meantime):
+
+``` bash
+composer require jeylabs/laravel-audit-log:dev-master
+```
+
+The service provider is auto-discovered (Laravel's package auto-discovery), so there's no manual step to register it. If you've disabled auto-discovery for this package, add it to `bootstrap/providers.php` (Laravel 11+) or `config/app.php`'s `providers` array (older apps) yourself:
 
 ```php
-// config/app.php
-'providers' => [
-    ...
-    Jeylabs\AuditLog\AuditLogServiceProvider::class,
-];
+Jeylabs\AuditLog\AuditLogServiceProvider::class,
 ```
 
 You can publish the migration with:
