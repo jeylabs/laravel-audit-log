@@ -52,7 +52,9 @@
   "scripts": {
     "test": "vendor/bin/phpunit",
     "test-dynamodb-local": "vendor/bin/phpunit --group dynamodb-local",
-    "test-mongodb-local": "vendor/bin/phpunit --group mongodb-local"
+    "test-mongodb-local": "vendor/bin/phpunit --group mongodb-local",
+    "test-mysql-local": "vendor/bin/phpunit --group mysql-local",
+    "test-postgres-local": "vendor/bin/phpunit --group postgres-local"
   },
   "license": "MIT"
 }

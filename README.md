@@ -194,6 +194,15 @@ Every write goes through the `Jeylabs\AuditLog\Contracts\AuditLogStore` contract
 
 This is the default `eloquent` driver and needs nothing beyond the standard installation above — Eloquent is database-agnostic, so pointing your app's default database connection at MySQL or PostgreSQL (any currently supported version) just works. `subject()`/`causer()` relations, `AuditLog::causedBy()`/`forSubject()`/`inLog()` scopes, and `$user->auditLog`/`$user->activity` (via `LogsAudit`/`CausesAudit`) are all fully supported.
 
+The unit tests exercise this same `EloquentAuditLogStore` code path against sqlite. To also run it against a live MySQL or PostgreSQL server (catches anything sqlite's more lenient typing papers over):
+
+```bash
+MYSQL_LOCAL_DSN=mysql://user:pass@127.0.0.1:3306/audit_log_it composer test-mysql-local
+POSTGRES_LOCAL_DSN=pgsql://user:pass@127.0.0.1:5432/audit_log_it composer test-postgres-local
+```
+
+`tests/Integration/MySqlLocalIntegrationTest.php` and `tests/Integration/PostgresLocalIntegrationTest.php` skip themselves when their respective env var isn't set, so they're a no-op in normal `composer test` runs / CI without those servers available.
+
 ### MongoDB
 
 1. `composer require mongodb/laravel-mongodb` (and the PHP `mongodb` extension) — not a dependency of this package, since most apps don't need it.
